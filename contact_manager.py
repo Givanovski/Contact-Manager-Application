@@ -18,6 +18,21 @@ def create_table():
     db.close()
 
 
+def add_contact_to_db(name, email, phone):
+    try:
+        db = sqlite3.connect(DB_FILE)
+        cursor = db.cursor()
+
+        cursor.execute("INSERT INTO contacts (name, email, phone) VALUES (?, ?, ?)",
+                       (name, email, phone))
+        db.commit()
+        print("Contact added successfully.")
+    except sqlite3.IntegrityError:
+        print("Contact with the same name already exists. Please provide a unique name.")
+    finally:
+        db.close()
+
+
 def add_contact():
     name = input("Please enter your\nname: ").lower()
     email = input("email: ")
@@ -27,13 +42,22 @@ def add_contact():
         print("Invalid input. Please provide values for all three parameters.")
         return
 
-    new_contact = {
-        "name": name,
-        "email": email,
-        "phone": phone
-    }
-    contacts.append(new_contact)
-    print("Contact added:", new_contact)
+    add_contact_to_db(name, email, phone)
+
+
+def update_contact_in_db(name, field, new_value):
+    try:
+        db = sqlite3.connect(DB_FILE)
+        cursor = db.cursor()
+
+        cursor.execute(f"UPDATE contacts SET {field} = ? WHERE name = ?", (new_value, name))
+        db.commit()
+        print(f"{field.capitalize()} update successfully.")
+    except sqlite3.Error as e:
+        print(f"Error updating contact: {e}")
+
+    finally:
+        db.close()
 
 
 def update_contact():
@@ -42,11 +66,14 @@ def update_contact():
         print("Invalid name. Please provide a valid name.")
         return
 
-    contact_found = False
+    try:
+        db = sqlite3.connect(DB_FILE)
+        cursor = db.cursor()
 
-    for contact in contacts:
-        if contact["name"] == name:
-            contact_found = True
+        cursor.execute("SELECT * FROM contacts WHERE name = ?", (name,))
+        result = cursor.fetchone()
+
+        if result:
             print("Contact found. What do you want to update?")
             print("1. Email")
             print("2. Phone")
@@ -56,13 +83,11 @@ def update_contact():
 
             if choice == "1":
                 new_email = input("Enter new email: ")
-                contact["email"] = new_email
-                print("Email updated successfully.")
+                update_contact_in_db(name, "email", new_email)
 
             elif choice == "2":
                 new_phone = input("Enter new phone: ")
-                contact["phone"] = new_phone
-                print("Phone updated successfully.")
+                update_contact_in_db(name, "phone", new_phone)
 
             elif choice == "3":
                 print("Operation canceled.")
@@ -70,9 +95,12 @@ def update_contact():
             else:
                 print("Invalid choice. Please enter 1, 2, or 3")
                 return
-
-    if not contact_found:
-        print("Contact not found. Add the contact first.")
+        else:
+            print("Contact not found. Add the contact first.")
+    except sqlite3.Error as e:
+        print(f"Error updating contact: {e}")
+    finally:
+        db.close()
 
 
 def print_contact_details(contact):
@@ -83,24 +111,40 @@ def print_contact_details(contact):
 
 
 def view_all_contacts():
-    if not contacts:
-        print("No contacts available.")
-    else:
-        for contact in contacts:
-            print_contact_details(contact)
+    try:
+        db = sqlite3.connect(DB_FILE)
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM contacts")
+        result = cursor.fetchall()
+        if not result:
+            print("No contacts available.")
+        else:
+            for contact in result:
+                print_contact_details({"name": contact[1], "email": contact[2], "phone": contact[3]})
+    except sqlite3.Error as e:
+        print(f"Error retrieving contacts: {e}")
+    finally:
+        db.close()
 
 
 def view_contact_by_name():
     name = input("Please enter the name of the contact you want to view: ").lower()
-    contact_found = False
+    try:
+        db = sqlite3.connect(DB_FILE)
+        cursor = db.cursor()
 
-    for contact in contacts:
-        if contact["name"] == name:
-            print_contact_details(contact)
-            contact_found = True
-            break
-    if not contact_found:
-        print("Contact not found.")
+        cursor.execute("SELECT * FROM contacts WHERE name = ?", (name,))
+        contact = cursor.fetchone()
+
+        if contact:
+            print_contact_details({"name": contact[1], "email": contact[2], "phone": contact[3]})
+        else:
+            print("Contact not found.")
+    except sqlite3.Error as e:
+        print(f"Error retrieving contact: {e}")
+    finally:
+        db.close()
 
 
 def view_contacts():
@@ -117,17 +161,29 @@ def view_contacts():
         print("Invalid choice. Please enter 1 or 2.")
 
 
+def delete_contact_from_db(name):
+    try:
+        db = sqlite3.connect(DB_FILE)
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM contacts WHERE name = ?", (name,))
+        existing_contact = cursor.fetchone()
+
+        if existing_contact:
+            cursor.execute("DELETE FROM contacts WHERE name = ?", (name,))
+            db.commit()
+            print(f"Contact '{name}' deleted successfully.")
+        else:
+            print(f"Contact '{name}' not found.")
+    except sqlite3.Error as e:
+        print(f"Error deleting contact: {e}")
+    finally:
+        db.close()
+
+
 def delete_contact_by_name():
-    if not contacts:
-        print("No contacts available.")
-    else:
-        name = input("Please enter the name of the contact you want to delete: ").lower()
-        for contact in contacts:
-            if contact["name"] == name:
-                contacts.remove(contact)
-                print(f"Contact '{name}' deleted successfully.")
-                return
-        print(f"Contact '{name}' not found")
+    name = input("Please enter the name of the contact you want to delete: ").lower()
+    delete_contact_from_db(name)
 
 
 def display_menu():
@@ -140,28 +196,28 @@ def display_menu():
     print("5. Exit")
 
 
-while True:
-    display_menu()
-    choice = input("Enter your choice (1/2/3/4/5): ")
+if __name__ == "__main__":
+    create_table()
 
-    if choice == '1':
-        add_contact()
-        print(contacts)
+    while True:
+        display_menu()
+        choice = input("Enter your choice (1/2/3/4/5): ")
 
-    elif choice == '2':
-        update_contact()
-        print(contacts)
+        if choice == '1':
+            add_contact()
 
-    elif choice == '3':
-        view_contacts()
+        elif choice == '2':
+            update_contact()
 
-    elif choice == '4':
-        delete_contact_by_name()
-        print(contacts)
+        elif choice == '3':
+            view_contacts()
 
-    elif choice == '5':
-        print("Exiting the program.")
-        break
+        elif choice == '4':
+            delete_contact_by_name()
 
-    else:
-        print("Invalid choice. Please enter 1, 2, 3, 4 or 5.")
+        elif choice == '5':
+            print("Exiting the program.")
+            break
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, 4 or 5.")
