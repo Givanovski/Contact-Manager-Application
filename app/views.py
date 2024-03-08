@@ -9,6 +9,7 @@ contacts_bp = Blueprint("contacts", __name__)
 
 
 @contacts_bp.route("/", methods=["GET"])
+@contacts_bp.route("/contacts", methods=["GET"])
 def get_all_contacts():
     """
     Get all contacts from the database.
