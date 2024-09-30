@@ -29,13 +29,12 @@ The following endpoints are available for managing contacts:
 - **Method**: `POST`
 - **URL**: `http://127.0.0.1:5000/add`
 - **Body** (application/x-www-form-urlencoded):
-  - `name` (string): Name of the new contact.
-  - `email` (string): Email of the new contact.
-  - `phone` (string): Phone number of the new contact.
-- **Example**:
-  - `name`: `petar`
-  - `email`: `petar@example.com`
-  - `phone`: `075222111`
+  - `name` (string): The name of the new contact.
+  - `email` (string): The email address of the new contact.
+  - `phone` (string): The phone number of the new contact.
+- **Example Request**: You can add a new contact using the following `curl` command:
+  ```bash
+  curl -X POST http://127.0.0.1:5000/add -d "name=petar&email=petar@example.com&phone=075222111"
 - **Description**: Adds a new contact to the database.
 
 ### 5. Update Phone Number
