@@ -1,6 +1,6 @@
 # Contact Management API
 
-This project defines a Flask Blueprint for managing contact-related routes, allowing for operations such as retrieving, adding, updating, and deleting contacts. The API communicates with a SQLite database to perform these operations.
+This project defines a Flask Blueprint for managing contact-related routes, allowing for operations such as retrieving, adding, updating, and deleting contacts. The API communicates with a SQLite database to perform these operations.By adhering to RESTful principles, this implementation ensures that the API is intuitive and easy to interact with, following standard HTTP methods like GET, POST, PATCH, and DELETE.
 
 ## API Endpoints
 
