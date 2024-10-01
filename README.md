@@ -51,6 +51,15 @@ The following endpoints are available for managing contacts:
 - **Example**: `http://127.0.0.1:5000/delete/petar`
 - **Description**: Deletes the specified contact from the database.
 
+## API Documentation
+
+You can find the full API documentation for the Contact Manager API on Postman:
+
+[View API Documentation](https://web.postman.co/workspace/18f135b2-b1f2-4ec1-80f7-d849108b608d/documentation/32546891-32cfce4f-7cec-4d38-a990-09918e8780e2)
+
+This documentation provides details on all available endpoints, request methods, and response formats.
+
+
 ## Installation
 1. Clone the repository:
    ``` bash
